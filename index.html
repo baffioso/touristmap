@@ -1,0 +1,111 @@
+<html>
+<head>
+	<title>Tourist Map</title>
+	<link rel="shortcut icon" href="pics/ballerup.ico" >
+	
+	<meta charset="UTF-8"/>
+	<script src='https://api.tiles.mapbox.com/mapbox.js/v2.0.1/mapbox.js'></script>
+	<link href='https://api.tiles.mapbox.com/mapbox.js/v2.0.1/mapbox.css' rel='stylesheet' />
+	
+	<script src="js/leaflet-layerjson.js"></script>
+
+	<script src="js/l.control.geosearch.js"></script>
+	<script src="js/l.geosearch.provider.google.js"></script>
+	<link rel="stylesheet" href="css/l.geosearch.css" />
+	
+	<script src='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.24.0/L.Control.Locate.js'></script>
+	<link href='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.24.0/L.Control.Locate.css' rel='stylesheet' />
+	
+	<script src="js/data.js"></script>
+
+	<script src='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-hash/v0.2.1/leaflet-hash.js'></script>
+	<link rel="stylesheet" href="css/layercontrol.css" />	
+</head>
+	
+<body>
+	
+	<nav id='menu-ui' class='menu-ui'></nav>
+
+	<!-- Kortrammen laves og størrelsen deffineres-->
+	<div id="map"></div>
+	<style>
+		#map { height: 100%; width: 100%}
+	</style>
+
+	<script>
+	
+		//Baggrundskort loades
+		var dark = L.mapbox.tileLayer('https://api.tiles.mapbox.com/v3/baffioso.ie1ok8lg.json');
+		
+		
+		
+		//Natteliv fra OSM-databasen tilføjes til kortet vha. overpass API.
+		
+		
+		var post = L.layerGroup([postkasse, post_office]);
+		var nature = L.layerGroup([park, playground]);
+
+		//Centrum for kort og zoomniveau sættes
+		var map = L.map('map', {
+			center: [55.726998, 12.358160],
+			zoom: 13,
+			minZoom: 11,
+			layers: dark
+		});
+		
+		//Custome lagkontrol
+		var layers = document.getElementById('menu-ui');
+
+		addLayer(L.layerGroup([restaurant, fast_food, cafe]), '<img src="pics/restaurant.png"><br> FOOD', 1);
+		addLayer(L.layerGroup([hotel, hostel]), '<img src="pics/hotel.png"><br> SLEEPING', 2);
+		addLayer(L.layerGroup([pub, bar, club]), '<img src="pics/bar-12.png"><br> NIGHTLIFE', 3);
+		addLayer(L.layerGroup([museum, artwork, monument]), '<img src="pics/statue.png"><br> MUSEUM / ART', 4);
+		addLayer(L.layerGroup([park, playground]), '<img src="pics/urbanpark.png"><br> OUTDOOR', 5);
+		addLayer(L.layerGroup([postkasse, post_office]), '<img src="pics/post.png"><br> POST', 6);
+
+
+
+		function addLayer(layer, name, zIndex) {
+   			layer
+        		.setZIndex(zIndex);
+
+    	// Create a simple layer switcher that
+    	// toggles layers on and off.
+    	var link = document.createElement('a');
+        	link.href = '#';
+        	link.className = 'inactive';
+        	link.innerHTML = name;
+
+    	link.onclick = function(e) {
+        	e.preventDefault();
+        	e.stopPropagation();
+
+        if (map.hasLayer(layer)) {
+            map.removeLayer(layer);
+            this.className = '';
+        }else {
+            		map.addLayer(layer);
+            		this.className = 'active';
+        	}
+    		};
+
+    		layers.appendChild(link);
+		}
+		
+		//Geosearch
+		new L.Control.GeoSearch({
+            provider: new L.GeoSearch.Provider.Google()
+        }).addTo(map);
+        
+        //Geolocation tilføjes
+        L.control.locate().addTo(map);
+		
+		//Scalebar tilføjes
+		L.control.scale().addTo(map);
+		
+		//Koordinater i URL
+		var hash = L.hash(map);
+	</script>
+</body>
+</html>
+
